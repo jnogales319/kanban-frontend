@@ -13,10 +13,10 @@ interface ColumnProps {
 export function Column({ status, items, onItemClick }: ColumnProps) {
   return (
     <Stack
-      className={`bg-body-tertiary rounded p-2 h-100 ${styles.column}`}
+      className={`bg-body-tertiary rounded p-2 ${styles.column}`}
       data-testid={`column-${status}`}
     >
-      <div className="d-flex align-items-center justify-content-between px-1 mb-2">
+      <div className="d-flex align-items-center justify-content-between px-1 mb-2 flex-shrink-0">
         <h2 className="h6 mb-0">{status}</h2>
         <Badge bg="secondary" pill>
           {items.length}
@@ -28,7 +28,7 @@ export function Column({ status, items, onItemClick }: ColumnProps) {
           <div
             ref={provided.innerRef}
             {...provided.droppableProps}
-            className={`flex-grow-1 rounded p-1 ${styles.dropzone} ${
+            className={`flex-grow-1 overflow-auto rounded p-1 ${styles.dropzone} ${
               snapshot.isDraggingOver ? styles.dropzoneActive : ''
             }`.trim()}
           >

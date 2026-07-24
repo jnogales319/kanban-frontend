@@ -2,6 +2,7 @@ import { DragDropContext } from '@hello-pangea/dnd';
 import type { DropResult } from '@hello-pangea/dnd';
 import { Column } from './Column';
 import { groupByStatus, moveWorkItem } from '../lib/workItems';
+import styles from './KanbanBoard.module.css';
 import { STATUSES } from '../types';
 import type { Status, WorkItem } from '../types';
 
@@ -27,7 +28,7 @@ export function KanbanBoard({ items, onItemsChange, onItemClick }: KanbanBoardPr
 
   return (
     <DragDropContext onDragEnd={handleDragEnd}>
-      <div className="d-flex gap-3 align-items-start">
+      <div className={`d-flex gap-3 flex-grow-1 ${styles.board}`}>
         {STATUSES.map((status) => (
           <Column key={status} status={status} items={itemsByStatus[status]} onItemClick={onItemClick} />
         ))}

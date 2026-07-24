@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Button, Container, Stack } from 'react-bootstrap';
 import { KanbanBoard } from './components/KanbanBoard';
 import { WorkItemModal } from './components/WorkItemModal';
+import styles from './App.module.css';
 import type { WorkItem } from './types';
 
 function App() {
@@ -30,8 +31,11 @@ function App() {
   };
 
   return (
-    <Container as="main" fluid className="py-4">
-      <Stack direction="horizontal" className="justify-content-between align-items-center mb-4">
+    <Container as="main" fluid className={`py-4 ${styles.page}`}>
+      <Stack
+        direction="horizontal"
+        className="justify-content-between align-items-center mb-4 flex-shrink-0"
+      >
         <h1 className="h2 mb-0">Kanban Board</h1>
         <Button onClick={openCreateModal}>+ Add Work Item</Button>
       </Stack>
