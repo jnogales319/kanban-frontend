@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { groupByStatus, moveWorkItem } from './workItems';
+import { findNewlyCompletedItem, groupByStatus, moveWorkItem } from './workItems';
 import type { WorkItem } from '../types';
 
 const rick = { id: 'c1', name: 'Rick Sanchez', image: 'rick.png' };
@@ -92,5 +92,34 @@ describe('moveWorkItem', () => {
     moveWorkItem(items, { status: 'To Do', index: 0 }, { status: 'Doing', index: 0 });
 
     expect(items).toEqual(snapshot);
+  });
+});
+
+describe('findNewlyCompletedItem', () => {
+  it('returns the item that just transitioned into Done', () => {
+    const previous = [makeItem('1', 'Doing')];
+    const next = [makeItem('1', 'Done')];
+
+    expect(findNewlyCompletedItem(previous, next)?.id).toBe('1');
+  });
+
+  it('returns null when an item is only reordered within Done', () => {
+    const previous = [makeItem('1', 'Done'), makeItem('2', 'Done')];
+    const next = [makeItem('2', 'Done'), makeItem('1', 'Done')];
+
+    expect(findNewlyCompletedItem(previous, next)).toBeNull();
+  });
+
+  it('returns null for a brand new item created directly with Done status', () => {
+    const next = [makeItem('1', 'Done')];
+
+    expect(findNewlyCompletedItem([], next)).toBeNull();
+  });
+
+  it('returns null when an already-Done item is edited without a status change', () => {
+    const previous = [makeItem('1', 'Done')];
+    const next = [{ ...makeItem('1', 'Done'), name: 'Renamed' }];
+
+    expect(findNewlyCompletedItem(previous, next)).toBeNull();
   });
 });

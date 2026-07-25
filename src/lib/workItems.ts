@@ -43,3 +43,19 @@ export function moveWorkItem(
 
   return STATUSES.flatMap((status) => updatedGroups[status]);
 }
+
+/**
+ * Finds an item that just transitioned into Done, comparing against its
+ * previous status. Reordering within Done, edits that don't touch status,
+ * and brand-new items created directly with Done status all return null —
+ * only an existing item crossing into Done counts as "newly completed".
+ */
+export function findNewlyCompletedItem(previous: WorkItem[], next: WorkItem[]): WorkItem | null {
+  for (const item of next) {
+    const before = previous.find((i) => i.id === item.id);
+    if (before && before.status !== 'Done' && item.status === 'Done') {
+      return item;
+    }
+  }
+  return null;
+}
