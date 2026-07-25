@@ -3,6 +3,7 @@ import { render, screen, waitForElementToBeRemoved, within } from '@testing-libr
 import userEvent from '@testing-library/user-event';
 import App from './App';
 import { searchCharacters } from './api/rickAndMorty';
+import { fireAnimationEnd } from './test/fireAnimationEnd';
 
 vi.mock('./api/rickAndMorty', () => ({
   searchCharacters: vi.fn(),
@@ -55,6 +56,39 @@ describe('App', () => {
     expect(column('Done').getByText('Ship feature')).toBeInTheDocument();
     expect(column('Done').getByText('1')).toBeInTheDocument();
     expect(column('To Do').getByText('0')).toBeInTheDocument();
+  });
+
+  it('shows the Done celebration image when an edit changes status to Done', async () => {
+    const user = userEvent.setup();
+    render(<App />);
+
+    await addWorkItem(user, 'Ship feature');
+    expect(screen.queryByTestId('done-celebration')).not.toBeInTheDocument();
+
+    await user.click(screen.getByText('Ship feature'));
+    await user.selectOptions(screen.getByLabelText('Status'), 'Done');
+    await user.click(screen.getByRole('button', { name: /save changes/i }));
+
+    expect(screen.getByTestId('done-celebration')).toBeInTheDocument();
+  });
+
+  it('does not show the Done celebration image when a Done item is edited without changing status', async () => {
+    const user = userEvent.setup();
+    render(<App />);
+
+    await addWorkItem(user, 'Ship feature');
+    await user.click(screen.getByText('Ship feature'));
+    await user.selectOptions(screen.getByLabelText('Status'), 'Done');
+    await user.click(screen.getByRole('button', { name: /save changes/i }));
+    fireAnimationEnd(screen.getByTestId('done-celebration'));
+    expect(screen.queryByTestId('done-celebration')).not.toBeInTheDocument();
+
+    await user.click(screen.getByText('Ship feature'));
+    await user.clear(screen.getByLabelText('Name'));
+    await user.type(screen.getByLabelText('Name'), 'Ship feature v2');
+    await user.click(screen.getByRole('button', { name: /save changes/i }));
+
+    expect(screen.queryByTestId('done-celebration')).not.toBeInTheDocument();
   });
 
   it('preserves an item across edits that do not change its status', async () => {

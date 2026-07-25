@@ -1,7 +1,9 @@
-import { useState } from 'react';
+import { useCallback, useState } from 'react';
 import { Button, Container, Stack } from 'react-bootstrap';
 import { KanbanBoard } from './components/KanbanBoard';
 import { WorkItemModal } from './components/WorkItemModal';
+import { DoneCelebration } from './components/DoneCelebration';
+import { findNewlyCompletedItem } from './lib/workItems';
 import styles from './App.module.css';
 import type { Status, WorkItem } from './types';
 
@@ -10,6 +12,15 @@ function App() {
   const [showModal, setShowModal] = useState(false);
   const [editingItem, setEditingItem] = useState<WorkItem | null>(null);
   const [createStatus, setCreateStatus] = useState<Status>('To Do');
+  const [celebratingItemId, setCelebratingItemId] = useState<string | null>(null);
+
+  const clearCelebration = useCallback(() => setCelebratingItemId(null), []);
+
+  const commitItems = (next: WorkItem[]) => {
+    const completed = findNewlyCompletedItem(items, next);
+    if (completed) setCelebratingItemId(completed.id);
+    setItems(next);
+  };
 
   const openCreateModal = (status: Status = 'To Do') => {
     setEditingItem(null);
@@ -25,10 +36,8 @@ function App() {
   const closeModal = () => setShowModal(false);
 
   const handleSave = (item: WorkItem) => {
-    setItems((prev) => {
-      const exists = prev.some((i) => i.id === item.id);
-      return exists ? prev.map((i) => (i.id === item.id ? item : i)) : [item, ...prev];
-    });
+    const exists = items.some((i) => i.id === item.id);
+    commitItems(exists ? items.map((i) => (i.id === item.id ? item : i)) : [item, ...items]);
     setShowModal(false);
   };
 
@@ -44,7 +53,7 @@ function App() {
 
       <KanbanBoard
         items={items}
-        onItemsChange={setItems}
+        onItemsChange={commitItems}
         onItemClick={openEditModal}
         onAddItem={openCreateModal}
       />
@@ -56,6 +65,8 @@ function App() {
         onClose={closeModal}
         onSave={handleSave}
       />
+
+      <DoneCelebration itemId={celebratingItemId} onDone={clearCelebration} />
     </Container>
   );
 }
