@@ -1,0 +1,8 @@
+.card {
+  width: 100%;
+}
+
+.details {
+  min-width: 0;
+  overflow-wrap: break-word;
+}
