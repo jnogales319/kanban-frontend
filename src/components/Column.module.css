@@ -1,0 +1,12 @@
+.column {
+  flex: 1 1 0;
+  min-width: 0;
+}
+
+.dropzone {
+  min-height: 120px;
+}
+
+.dropzoneActive {
+  background-color: rgba(13, 110, 253, 0.08);
+}
