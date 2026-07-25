@@ -20,13 +20,18 @@ beforeEach(() => {
 
 describe('WorkItemModal', () => {
   it('shows "Add Work Item" as the title when creating', () => {
-    render(<WorkItemModal show item={null} onClose={() => {}} onSave={() => {}} />);
+    render(<WorkItemModal show item={null} defaultStatus="To Do" onClose={() => {}} onSave={() => {}} />);
     expect(screen.getByText('Add Work Item')).toBeInTheDocument();
+  });
+
+  it('pre-selects defaultStatus when creating a new item', () => {
+    render(<WorkItemModal show item={null} defaultStatus="Doing" onClose={() => {}} onSave={() => {}} />);
+    expect(screen.getByDisplayValue('Doing')).toBeInTheDocument();
   });
 
   it('shows "Edit Work Item" and pre-fills fields when editing', () => {
     const item: WorkItem = { id: '1', name: 'Fix bug', status: 'Doing', character: rick };
-    render(<WorkItemModal show item={item} onClose={() => {}} onSave={() => {}} />);
+    render(<WorkItemModal show item={item} defaultStatus="To Do" onClose={() => {}} onSave={() => {}} />);
 
     expect(screen.getByText('Edit Work Item')).toBeInTheDocument();
     expect(screen.getByDisplayValue('Fix bug')).toBeInTheDocument();
@@ -37,7 +42,7 @@ describe('WorkItemModal', () => {
   it('blocks submission and does not save when name is empty', async () => {
     const user = userEvent.setup();
     const handleSave = vi.fn();
-    render(<WorkItemModal show item={null} onClose={() => {}} onSave={handleSave} />);
+    render(<WorkItemModal show item={null} defaultStatus="To Do" onClose={() => {}} onSave={handleSave} />);
 
     await user.click(screen.getByRole('button', { name: /add item/i }));
 
@@ -48,7 +53,7 @@ describe('WorkItemModal', () => {
   it('blocks submission and does not save when no character is selected', async () => {
     const user = userEvent.setup();
     const handleSave = vi.fn();
-    render(<WorkItemModal show item={null} onClose={() => {}} onSave={handleSave} />);
+    render(<WorkItemModal show item={null} defaultStatus="To Do" onClose={() => {}} onSave={handleSave} />);
 
     await user.type(screen.getByLabelText('Name'), 'Write tests');
     await user.click(screen.getByRole('button', { name: /add item/i }));
@@ -61,7 +66,7 @@ describe('WorkItemModal', () => {
   it('saves a new item with the entered name, default status, and selected character', async () => {
     const user = userEvent.setup();
     const handleSave = vi.fn();
-    render(<WorkItemModal show item={null} onClose={() => {}} onSave={handleSave} />);
+    render(<WorkItemModal show item={null} defaultStatus="To Do" onClose={() => {}} onSave={handleSave} />);
 
     await user.type(screen.getByLabelText('Name'), 'Write tests');
     await user.type(screen.getByLabelText('Rick and Morty Character'), 'rick');
@@ -77,7 +82,7 @@ describe('WorkItemModal', () => {
     const user = userEvent.setup();
     const handleSave = vi.fn();
     const item: WorkItem = { id: '42', name: 'Fix bug', status: 'To Do', character: rick };
-    render(<WorkItemModal show item={item} onClose={() => {}} onSave={handleSave} />);
+    render(<WorkItemModal show item={item} defaultStatus="To Do" onClose={() => {}} onSave={handleSave} />);
 
     await user.selectOptions(screen.getByLabelText('Status'), 'Done');
     await user.click(screen.getByRole('button', { name: /save changes/i }));
@@ -88,7 +93,7 @@ describe('WorkItemModal', () => {
   it('searches for and attaches a character to the saved item', async () => {
     const user = userEvent.setup();
     const handleSave = vi.fn();
-    render(<WorkItemModal show item={null} onClose={() => {}} onSave={handleSave} />);
+    render(<WorkItemModal show item={null} defaultStatus="To Do" onClose={() => {}} onSave={handleSave} />);
 
     await user.type(screen.getByLabelText('Name'), 'Investigate portal bug');
     await user.type(screen.getByLabelText('Rick and Morty Character'), 'rick');
@@ -107,7 +112,7 @@ describe('WorkItemModal', () => {
     const user = userEvent.setup();
     mockedSearchCharacters.mockReset();
     mockedSearchCharacters.mockRejectedValueOnce(new Error('Network error'));
-    render(<WorkItemModal show item={null} onClose={() => {}} onSave={() => {}} />);
+    render(<WorkItemModal show item={null} defaultStatus="To Do" onClose={() => {}} onSave={() => {}} />);
 
     await user.type(screen.getByLabelText('Rick and Morty Character'), 'rick');
 
@@ -116,7 +121,7 @@ describe('WorkItemModal', () => {
 
   it('aborts the previous character search when a new one starts', async () => {
     const user = userEvent.setup();
-    render(<WorkItemModal show item={null} onClose={() => {}} onSave={() => {}} />);
+    render(<WorkItemModal show item={null} defaultStatus="To Do" onClose={() => {}} onSave={() => {}} />);
 
     await user.type(screen.getByLabelText('Rick and Morty Character'), 'r');
     await waitFor(() => expect(mockedSearchCharacters).toHaveBeenCalledTimes(1));
@@ -132,7 +137,7 @@ describe('WorkItemModal', () => {
     const user = userEvent.setup();
     const handleClose = vi.fn();
     const handleSave = vi.fn();
-    render(<WorkItemModal show item={null} onClose={handleClose} onSave={handleSave} />);
+    render(<WorkItemModal show item={null} defaultStatus="To Do" onClose={handleClose} onSave={handleSave} />);
 
     await user.click(screen.getByRole('button', { name: /cancel/i }));
 

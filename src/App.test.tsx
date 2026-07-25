@@ -20,10 +20,11 @@ function column(status: 'To Do' | 'Doing' | 'Done') {
 }
 
 async function addWorkItem(user: ReturnType<typeof userEvent.setup>, name: string) {
-  await user.click(screen.getByRole('button', { name: /add work item/i }));
+  await user.click(screen.getByRole('button', { name: '+ Add Work Item' }));
   await user.type(screen.getByLabelText('Name'), name);
   await user.type(screen.getByLabelText('Rick and Morty Character'), 'rick');
-  await user.click(await screen.findByText('Rick Sanchez'));
+  const dialog = within(screen.getByRole('dialog'));
+  await user.click(await dialog.findByText('Rick Sanchez'));
   await user.click(screen.getByRole('button', { name: /add item/i }));
   await waitForElementToBeRemoved(() => screen.queryByText('Add Work Item'));
 }
@@ -69,5 +70,36 @@ describe('App', () => {
 
     expect(column('To Do').getByText('Renamed item')).toBeInTheDocument();
     expect(column('To Do').getByText('1')).toBeInTheDocument();
+  });
+
+  it('adds a work item directly to Doing via its column button, defaulting the status', async () => {
+    const user = userEvent.setup();
+    render(<App />);
+
+    await user.click(column('Doing').getByRole('button', { name: 'Add work item to Doing' }));
+    expect(screen.getByDisplayValue('Doing')).toBeInTheDocument();
+
+    await user.type(screen.getByLabelText('Name'), 'Review PR');
+    await user.type(screen.getByLabelText('Rick and Morty Character'), 'rick');
+    await user.click(await within(screen.getByRole('dialog')).findByText('Rick Sanchez'));
+    await user.click(screen.getByRole('button', { name: /add item/i }));
+    await waitForElementToBeRemoved(() => screen.queryByText('Add Work Item'));
+
+    expect(column('Doing').getByText('Review PR')).toBeInTheDocument();
+    expect(column('Doing').getByText('1')).toBeInTheDocument();
+    expect(column('To Do').getByText('0')).toBeInTheDocument();
+  });
+
+  it('adds new items to the top of their column', async () => {
+    const user = userEvent.setup();
+    render(<App />);
+
+    await addWorkItem(user, 'First item');
+    await addWorkItem(user, 'Second item');
+
+    const cardNames = column('To Do')
+      .getAllByText(/First item|Second item/)
+      .map((el) => el.textContent);
+    expect(cardNames).toEqual(['Second item', 'First item']);
   });
 });

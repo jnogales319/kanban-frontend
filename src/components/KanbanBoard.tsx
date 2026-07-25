@@ -10,9 +10,10 @@ interface KanbanBoardProps {
   items: WorkItem[];
   onItemsChange: (items: WorkItem[]) => void;
   onItemClick: (item: WorkItem) => void;
+  onAddItem: (status: Status) => void;
 }
 
-export function KanbanBoard({ items, onItemsChange, onItemClick }: KanbanBoardProps) {
+export function KanbanBoard({ items, onItemsChange, onItemClick, onAddItem }: KanbanBoardProps) {
   const itemsByStatus = groupByStatus(items);
 
   const handleDragEnd = (result: DropResult) => {
@@ -30,7 +31,13 @@ export function KanbanBoard({ items, onItemsChange, onItemClick }: KanbanBoardPr
     <DragDropContext onDragEnd={handleDragEnd}>
       <div className={`d-flex gap-3 flex-grow-1 ${styles.board}`}>
         {STATUSES.map((status) => (
-          <Column key={status} status={status} items={itemsByStatus[status]} onItemClick={onItemClick} />
+          <Column
+            key={status}
+            status={status}
+            items={itemsByStatus[status]}
+            onItemClick={onItemClick}
+            onAddItem={onAddItem}
+          />
         ))}
       </div>
     </DragDropContext>

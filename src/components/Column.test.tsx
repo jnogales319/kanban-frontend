@@ -1,15 +1,16 @@
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
 import { render, screen } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import { DragDropContext } from '@hello-pangea/dnd';
 import { Column } from './Column';
-import type { WorkItem } from '../types';
+import type { Status, WorkItem } from '../types';
 
 const rick = { id: 'c1', name: 'Rick Sanchez', image: 'rick.png' };
 
-function renderColumn(items: WorkItem[]) {
+function renderColumn(items: WorkItem[], onAddItem: (status: Status) => void = () => {}) {
   return render(
     <DragDropContext onDragEnd={() => {}}>
-      <Column status="To Do" items={items} onItemClick={() => {}} />
+      <Column status="To Do" items={items} onItemClick={() => {}} onAddItem={onAddItem} />
     </DragDropContext>,
   );
 }
@@ -38,6 +39,16 @@ describe('Column', () => {
   it('shows zero for an empty column', () => {
     renderColumn([]);
     expect(screen.getByText('0')).toBeInTheDocument();
+  });
+
+  it('calls onAddItem with its own status when the add button is clicked', async () => {
+    const user = userEvent.setup();
+    const handleAddItem = vi.fn();
+    renderColumn([], handleAddItem);
+
+    await user.click(screen.getByRole('button', { name: 'Add work item to To Do' }));
+
+    expect(handleAddItem).toHaveBeenCalledWith('To Do');
   });
 
   it('makes the card list independently scrollable instead of growing the page', () => {

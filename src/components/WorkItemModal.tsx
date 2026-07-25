@@ -11,11 +11,12 @@ import type { Character, Status, WorkItem } from '../types';
 interface WorkItemModalProps {
   show: boolean;
   item: WorkItem | null;
+  defaultStatus: Status;
   onClose: () => void;
   onSave: (item: WorkItem) => void;
 }
 
-export function WorkItemModal({ show, item, onClose, onSave }: WorkItemModalProps) {
+export function WorkItemModal({ show, item, defaultStatus, onClose, onSave }: WorkItemModalProps) {
   const isEditing = item !== null;
 
   const [name, setName] = useState('');
@@ -30,7 +31,7 @@ export function WorkItemModal({ show, item, onClose, onSave }: WorkItemModalProp
   useEffect(() => {
     if (show) {
       setName(item?.name ?? '');
-      setStatus(item?.status ?? 'To Do');
+      setStatus(item?.status ?? defaultStatus);
       setSelectedCharacter(item?.character ? [item.character] : []);
       setCharacterOptions(item?.character ? [item.character] : []);
       setSearchError(null);
@@ -39,7 +40,7 @@ export function WorkItemModal({ show, item, onClose, onSave }: WorkItemModalProp
     return () => {
       searchAbortRef.current?.abort();
     };
-  }, [show, item]);
+  }, [show, item, defaultStatus]);
 
   const handleSearch = async (query: string) => {
     // Cancel any still-in-flight search so its response can't arrive after
